@@ -24,3 +24,18 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    - name: Run SSH command
+      uses: garygrossgarten/github-action-ssh@v0.6.3
+      with:
+        # Command to execute on the remote server.
+        command: './remote-script.sh'
+        # Hostname or IP address of the server.
+        host: ${{ secrets.ML_SERVER }}
+        # Username for authentication.
+        username: ${{ secrets.ML_USER }}
+        # Port number of the server.
+        port: ${{ secrets.ML_PORT }}
+        # File Location or string that contains a private key for either key-based or hostbased user authentication (OpenSSH format)
+        privateKey: ${{ secrets.PRIVATE_KEY }} 
+      
+      
