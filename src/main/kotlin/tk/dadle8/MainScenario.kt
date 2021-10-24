@@ -5,6 +5,10 @@ import com.justai.jaicf.channel.yandexalice.model.AliceEvent
 import com.justai.jaicf.model.scenario.Scenario
 import org.json.JSONObject
 
+val URL_API_ML: String = System.getenv("URL_API_ML")
+const val WRITE_STATE_REGEX: String = "(запиши|записать|добавить) .+";
+const val GET_LIST_STATE_REGEX: String = "(показать список|покажи)";
+
 object MainScenario : Scenario() {
     init {
         state("main") {
@@ -13,13 +17,13 @@ object MainScenario : Scenario() {
             }
 
             action {
-                reactions.say("Привет! Скажи мне что-нибудь, а я запишу.")
+                reactions.say(Messages.WELCOME)
             }
         }
 
         state("write") {
             activators {
-                regex("(запиши|записать|добавить) .+")
+                regex(WRITE_STATE_REGEX)
             }
 
             action {
@@ -27,7 +31,7 @@ object MainScenario : Scenario() {
                 val items = tokens?.subList(1, tokens.size)?.filter { it != "и" }
                 if (items != null) {
                     sendGet(items)
-                    reactions.say("Записал:")
+                    reactions.say(Messages.WROTE)
                     items.forEach {
                         reactions.say(" $it")
                     }
@@ -37,18 +41,18 @@ object MainScenario : Scenario() {
 
         state("get_list") {
             activators {
-                regex("(показать список|покажи)")
+                regex(GET_LIST_STATE_REGEX)
             }
 
             action {
-                reactions.say("Записано:")
+                reactions.say(Messages.WRITTEN)
                 val items = getItems()
                 items.forEach { reactions.say(" $it") }
             }
         }
 
         fallback {
-            reactions.say("Скажи \"Запиши\" и продиктуй список.")
+            reactions.say(Messages.FALLBACK)
         }
     }
 }
@@ -56,14 +60,14 @@ object MainScenario : Scenario() {
 fun sendGet(tokens: List<String>) {
     tokens.forEach {
         khttp.post(
-            url = "https://dadle8.tk:8443/manageListItem?name=Покупочки&completed=true",
+            url = "$URL_API_ML&completed=true",
             json = mapOf("description" to "From Alice", "id" to "_" + getRandomString(9), "title" to it)
         )
     }
 }
 
 fun getItems(): List<String> {
-    val response = khttp.get(url = "https://dadle8.tk:8443/manageList?name=Покупочки")
+    val response = khttp.get(url = URL_API_ML)
     val listJson = response.jsonObject
     val todoItemsJson = listJson.getJSONArray("todoItems")
 

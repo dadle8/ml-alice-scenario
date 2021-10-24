@@ -1,16 +1,14 @@
 package tk.dadle8
 
 import com.justai.jaicf.channel.http.httpBotRouting
+import io.ktor.application.Application
 import io.ktor.routing.routing
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
+import io.ktor.server.netty.EngineMain
 
-fun main() {
+fun main(args: Array<String>): Unit = EngineMain.main(args)
 
-    embeddedServer(Netty, 8889) {
-        routing {
-            httpBotRouting("/" to channel)
-        }
-    }.start(wait = true)
-
+fun Application.module() {
+    routing {
+        httpBotRouting("/" to channel)
+    }
 }
